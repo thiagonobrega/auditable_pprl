@@ -1,1 +1,6 @@
 https://medium.com/@imolfar/bitwise-operations-and-bit-manipulation-in-solidity-ethereum-1751f3d2e216
+
+2026  truffle init
+2055  vim truffle-config.js 
+2057  truffle compile
+2058  truffle test
