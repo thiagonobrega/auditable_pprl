@@ -4,3 +4,7 @@ https://medium.com/@imolfar/bitwise-operations-and-bit-manipulation-in-solidity-
 2055  vim truffle-config.js 
 2057  truffle compile
 2058  truffle test
+
+
+
+compilar F5
