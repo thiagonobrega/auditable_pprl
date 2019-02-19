@@ -1,4 +1,4 @@
 bin/
 node/node_modules
-node/node_modules/*
-node/Build/
+node/node_modules/**
+node/README.md
