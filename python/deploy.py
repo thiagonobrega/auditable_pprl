@@ -3,7 +3,7 @@ from web3 import Web3, HTTPProvider
 
 web3 = Web3(HTTPProvider('http://localhost:8545'))
 
-contract_name = 'MyToken'
+contract_name = 'cc'
 
 #read contract data
 bin_dir = 'D:\\Dados\\OneDrive\\Doutorado\\workspace\\bc-playground\\bin\\'
