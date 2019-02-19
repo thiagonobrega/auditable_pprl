@@ -1,2 +1,8 @@
 pycryptodome==3.5.1
 web3
+
+`from Crypto.Protocol.KDF import scrypt`
+
+with:
+
+`import scrypt`
