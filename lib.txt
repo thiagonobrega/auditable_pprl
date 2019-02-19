@@ -8,3 +8,8 @@ https://medium.com/@imolfar/bitwise-operations-and-bit-manipulation-in-solidity-
 
 
 compilar F5
+
+   17  npm init
+   18  npm install --save web3
+   19  npm install --save truffle-hdwallet-provider
+   21  npm install --save solc@0.5.4

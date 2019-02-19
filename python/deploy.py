@@ -3,10 +3,11 @@ from web3 import Web3, HTTPProvider
 
 web3 = Web3(HTTPProvider('http://localhost:8545'))
 
-contract_name = 'cc'
+contract_name = 'CC1'
 
 #read contract data
-bin_dir = 'D:\\Dados\\OneDrive\\Doutorado\\workspace\\bc-playground\\bin\\'
+#bin_dir = 'D:\\Dados\\OneDrive\\Doutorado\\workspace\\bc-playground\\bin\\'
+bin_dir = '/home/thiagonobrega/workspace/bc-playground/bin/'
 c_abi = open(bin_dir + contract_name + '.abi', "r").read()
 c_bin = open(bin_dir + contract_name + '.bin', "r").read()
 
