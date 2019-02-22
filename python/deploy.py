@@ -3,7 +3,7 @@ from web3 import Web3, HTTPProvider
 
 web3 = Web3(HTTPProvider('http://localhost:8545'))
 
-contract_name = 'CC1'
+contract_name = 'CC2'
 
 #read contract data
 #bin_dir = 'D:\\Dados\\OneDrive\\Doutorado\\workspace\\bc-playground\\bin\\'
@@ -32,11 +32,17 @@ cc = web3.eth.contract(
     abi=c_abi,
 )
 
+print ('Creator',cc.call().creator)
+print ('Contracts',cc.call().newContracts)
+print ('OracleName',cc.call().oracleName)
 
 cc.functions.compareBloom(bytes([1]),bytes([3])).transact()
 transaction={'from': web3.eth.accounts[0], 'gas': 1000000, 'to': contract_address}
 
 cc.functions.compareBloom(bytes([1]),bytes([3])).call(transaction)
+cc.functions.compareBloom(bytes([1]),bytes([3])).transact(transaction)
+
+
 
 
 
