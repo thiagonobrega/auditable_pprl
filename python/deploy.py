@@ -15,16 +15,30 @@ c_bin = open(bin_dir + contract_name + '.bin', "r").read()
 AIFMRMCoin = web3.eth.contract(abi=c_abi, bytecode=c_bin)
 
 #unlock account
-web3.personal.unlockAccount(web3.eth.accounts[13], 'thiago', 0)
+web3.personal.unlockAccount(web3.eth.accounts[1], '', 0)
 
 #deploy contract
-tx_hash = AIFMRMCoin.constructor().transact({'from': web3.eth.accounts[13], 'gas': 1000000})
+tx_hash = AIFMRMCoin.constructor().transact({'from': web3.eth.accounts[1], 'gas': 1000000})
 
 # Get tx receipt to get contract address
 tx_receipt = web3.eth.getTransactionReceipt(tx_hash)
 
 contract_address = tx_receipt['contractAddress']
 contract_address
+'0x52DB67A188a2ddAd8433A80C494CbBb15002D125'
+
+cc = web3.eth.contract(
+    address=contract_address,
+    abi=c_abi,
+)
+
+
+cc.functions.compareBloom(bytes([1]),bytes([3])).transact()
+transaction={'from': web3.eth.accounts[0], 'gas': 1000000, 'to': contract_address}
+
+cc.functions.compareBloom(bytes([1]),bytes([3])).call(transaction)
+
+
 
 ## Uso do contrato
 # Mint 500 coins and check balance

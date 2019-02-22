@@ -2,3 +2,4 @@ bin/
 node/node_modules
 node/node_modules/**
 node/README.md
+cc.sol
