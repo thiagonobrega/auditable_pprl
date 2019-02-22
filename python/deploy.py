@@ -3,7 +3,7 @@ from web3 import Web3, HTTPProvider
 
 web3 = Web3(HTTPProvider('http://localhost:8545'))
 
-contract_name = 'CC2'
+contract_name = 'CC1'
 
 #read contract data
 #bin_dir = 'D:\\Dados\\OneDrive\\Doutorado\\workspace\\bc-playground\\bin\\'
@@ -22,15 +22,31 @@ tx_hash = AIFMRMCoin.constructor().transact({'from': web3.eth.accounts[1], 'gas'
 
 # Get tx receipt to get contract address
 tx_receipt = web3.eth.getTransactionReceipt(tx_hash)
+iter_count = 1
+
+while tx_receipt == None or iter_count < 30:
+    print("Trying.. " + str(iter_count) + "/30 ..." )
+    time.sleep(2)
+    tx_receipt = web3.eth.getTransactionReceipt(tx_hash)
+    iter_count+=1
+
+if tx_receipt == None:
+    import sys
+    print("Aborting!!!")
+    sys.exit()
+
 
 contract_address = tx_receipt['contractAddress']
-contract_address
-'0x52DB67A188a2ddAd8433A80C494CbBb15002D125'
+# contract_address
+# '0x52DB67A188a2ddAd8433A80C494CbBb15002D125'
 
 cc = web3.eth.contract(
     address=contract_address,
     abi=c_abi,
 )
+transaction={'from': web3.eth.accounts[0], 'gas': 1000000, 'to': contract_address}
+
+cc.functions.jaccardBloom(bytes([1]),bytes([3]),int(4)).call(transaction)
 
 print ('Creator',cc.call().creator)
 print ('Contracts',cc.call().newContracts)
@@ -42,7 +58,7 @@ transaction={'from': web3.eth.accounts[0], 'gas': 1000000, 'to': contract_addres
 cc.functions.compareBloom(bytes([1]),bytes([3])).call(transaction)
 cc.functions.compareBloom(bytes([1]),bytes([3])).transact(transaction)
 
-
+cc.functions.countBits(int(1)).call(transaction)
 
 
 
