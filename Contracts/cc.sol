@@ -24,7 +24,4 @@ contract CC1 {
 
         return count;
     }
-    
-    // return inter/union
-
 }
