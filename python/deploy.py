@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
     # first contract version
     print("Start deploying V1")
-    sfile = 'cc.sol'
+    sfile = 'cca.sol'
     compC = compileContract(sfile)
 
     cName = 'ComparasionClassification'
@@ -193,10 +193,10 @@ if __name__ == "__main__":
 
     web3.personal.unlockAccount(account, '', 0)
 
-    estimated_gas = cc.functions.compareEntities(bytes([1]), bytes([3])).estimateGas()
+    estimated_gas = cc.functions.compareEntities(int(1), int(3)).estimateGas()
 
 
-    transaction = {'from': account, 'gas': estimated_gas * 100, 'to': cc.address}
+    transaction = {'from': account, 'gas': 10000 * 100, 'to': cc.address}
 
 
 # //lista[1][1] [1][3]
@@ -204,8 +204,24 @@ if __name__ == "__main__":
     bf2 = int([1417339412015488780066050747435102632161478804817840413710209614188088266842068443593449269061577617159237509457013026941209910964486107061116509447317178157642633861512055661724526049722369461539986889302520475084166300371483023165748615314915778361267684316103501087541211295044117701622687720941172250905116051017901412598692788546243656116367388273818448008888232262])
     bf1 = 1796462574145599402897438328675413491728501682111757066863021392605688588261313524111693578991849793617116431838277285716444340715873681589454313701831280645724974685926691938026572487671431429249457077933456669184535152673613475765362480743133340037512211648389783546318089385079287481706286468671440959540753939571674881414739356066682360929299140884390031053986436416
     bf2 = 1417339412015488780066050747435102632161478804817840413710209614188088266842068443593449269061577617159237509457013026941209910964486107061116509447317178157642633861512055661724526049722369461539986889302520475084166300371483023165748615314915778361267684316103501087541211295044117701622687720941172250905116051017901412598692788546243656116367388273818448008888232262
-    cc.functions.compareEntities(web3.toBytes(bf1), web3.toBytes(bf2)).call(transaction)
+    # cc.functions.compareEntities(web3.toBytes(bf1), web3.toBytes(bf2)).call(transaction)
+    cc.functions.compareEntities(int(bf1), int(bf2)).call(transaction)
+    cc.functions.compareEntities(1, 3).call(transaction)
 
+    hex(bf1)
+    a = web3.toBytes(bf1)
+
+    a = bytes([1,0,1])
+    b = bytes([1, 0, 0])
+
+    estimated_gas = cc.functions.compareEntities(int(3),a, b).estimateGas()
+    transaction = {'from': account, 'gas': estimated_gas * 100, 'to': cc.address}
+
+
+    cc.functions.compareEntities(int(3),a, b).call(transaction)
+    cc.functions.countBits(int(3),b).call(transaction)
+    cc.functions.interBf(int(3), a, b).call(transaction)
+    cc.functions.unionBf(int(3), a, b).call(transaction)
 
 
 #     sds
