@@ -8,7 +8,7 @@ contract ComparasionClassification {
       * @param bf2 Height of the rectangle.
       * @return distance * 10**precison
       */
-    function jaccardBloom(bytes32 bf1, bytes32 bf2,uint precision) internal pure returns (uint256) {
+    function jaccardBloom(uint256 bf1, uint256 bf2,uint precision) internal pure returns (uint256) {
         uint inter = countBits(uint256(bf1 & bf2));
         uint union = countBits(uint256(bf1 | bf2));
         
@@ -45,7 +45,7 @@ contract ComparasionClassification {
         return count;
     }
 
-    function compareEntities(bytes32 bf1, bytes32 bf2) public pure returns (uint256) {
+    function compareEntities(uint256 bf1, uint256 bf2) public pure returns (uint256) {
         uint precision = 2;
         return jaccardBloom(bf1,bf2,precision);
     }
