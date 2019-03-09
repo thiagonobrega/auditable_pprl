@@ -2,12 +2,6 @@ pragma solidity >0.4.99 <0.6.0;
 
 contract ComparasionClassification {
 
-    
-     /** @dev Jaccard distance over to BloomFiltes
-      * @param bf1 Width of the rectangle.
-      * @param bf2 Height of the rectangle.
-      * @return distance * 10**precison
-      */
     function jaccardBloom(bytes32 bf1, bytes32 bf2,uint precision) internal pure returns (uint256) {
         uint inter = countBits(bf1 & bf2);
         uint union = countBits(bf1 | bf2);
@@ -20,14 +14,9 @@ contract ComparasionClassification {
         require(inter != 0,"Intercption <= 0");
         require(union != 0,"Union <= 0");
 
-        bytes memory a = new bytes(10);
-        bytes memory b = new bytes(10);
-
-        a & b;
-
-
-        
-        
+        //bytes memory a = new bytes(10);
+        //bytes memory b = new bytes(10);
+        //a & b;        
         
         uint q = inter*(10**precision);
         uint r = q/union;
@@ -36,10 +25,7 @@ contract ComparasionClassification {
         return r;
     }
 
-    /** @dev Count the number of bits in a uint256 
-      * @param callnum the uint256
-      * @return the number of ones
-      */
+    
     function countBits(bytes32 callnum) internal pure returns (uint) {
         uint count = 0;
         uint256 num = uint256(callnum); //fixe later
