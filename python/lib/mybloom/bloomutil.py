@@ -4,7 +4,7 @@ Created on 23 de abr de 2016
 @author: Thiago
 '''
 from __future__ import division
-from util.data import NullField
+from lib.util.data import NullField
 
 def dice_coefficient(filter1 , filter2):
     """ 
