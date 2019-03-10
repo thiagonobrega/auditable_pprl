@@ -290,6 +290,27 @@ if __name__ == 'main':
     file_name = 'bike-'+start+'-to-'+end+'.csv'
     save2csv(r,'e1',file_name)
 
+    ### rinkebe
+    w3 = Web3(HTTPProvider("https://rinkeby.infura.io/v3/ae955aa167d1467b94a59729f7b5770d"))
+    cFile = 'ccb.sol'
+    cName = 'ComparasionClassification'
+
+    print("Compiling SmartContracts")
+    cc = createInstaceContract(w3, cFile, cName)
+    print("Deploying SmartContracts")
+    from deploy import deployContractInfura
+    smc = deployContractInfura(w3, cc, cFile, cName)
+
+    start = datetime.datetime.today().strftime('%d-%m-%Y_%H-%M-%S')
+    r = exec_comparasion_regular_vs_bcjaccard(encrypted_entities, w3, smc, sleep_time=0.001)
+    end = datetime.datetime.today().strftime('%d-%H-%M-%S')
+
+    # r = exec_comparasion_regular_vs_bcjaccard(encrypted_entities[0:10], w3, smc, sleep_time=0.01)
+    # df = pd.DataFrame.from_records(r[1:], columns=r[0])
+    # print(df[['regular_jaccard', 'bc_jaccard']])
+    file_name = 'bike-PoA-' + start + '-to-' + end + '.csv'
+    save2csv(r, 'e1', file_name)
+
 
 
 

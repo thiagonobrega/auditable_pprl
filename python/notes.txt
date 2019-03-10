@@ -1,0 +1,6 @@
+# ether via faucet in metamask
+https://ropsten.etherscan.io/address/0xfcbb70e6983e2a24c7ee392d598a3060bae95096
+
+# ETHER twiter + https://faucet.rinkeby.io/
+https://www.rinkeby.io
+https://rinkeby.etherscan.io/address/0xfcbb70e6983e2a24c7ee392d598a3060bae95096
