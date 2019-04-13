@@ -86,13 +86,16 @@ def arrange_all_exec_time(results):
 if __name__ == '__main__':
     r_pow = read_result_data('..//results/e1/bike-PoW-09-03-2019_10-53-31-to-09-15-41-07.csv')
     r_poa = read_result_data('..//results/e1/bike-PoA-09-03-2019_16-57-35-to-09-21-28-20.csv')
+    r_pr = read_result_data('..//results/e1/bike-private-PoW-11-03-2019_17-17-16-to-11-20-23-25.csv')
 
-    r = arrange_bc_exec_time([r_pow, r_poa], ['Ropsten-PoW', 'Rinkeby-PoA'])
+    r = arrange_bc_exec_time([r_pr,r_pow, r_poa], ['Private-PoW','Ropsten-PoW', 'Rinkeby-PoA'])
 
+    fpr = plt_exec_time_general(r, 'Private-PoW', "Individual Private-PoW Execution Time")
     fpow = plt_exec_time_general(r,'Ropsten-PoW',"Individual Ropsten-PoW Execution Time")
     fpoa = plt_exec_time_general(r, 'Rinkeby-PoA', "Individual Rinkeby-PoA Execution Time")
     fall = plot_all_exec_time(r)
 
+    fpr.savefig('..//results/e1/pri_bike.png', bbox_inches='tight')
     fpow.savefig('..//results/e1/pow_bike.png', bbox_inches = 'tight')
     fpoa.savefig('..//results/e1/poa_bike.png', bbox_inches = 'tight')
     fall.savefig('..//results/e1/all_bike.png', bbox_inches = 'tight')

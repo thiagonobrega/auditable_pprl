@@ -8,3 +8,6 @@ cc.sol
 .vscode/settings.json
 python/.idea/
 *.pyc
+results/
+results/*
+results/**
