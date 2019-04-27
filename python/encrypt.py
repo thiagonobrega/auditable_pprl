@@ -11,7 +11,7 @@ import time
 import datetime
 
 import pandas as pd
-import bitarray
+from bitarray import bitarray
 import ngram
 from web3 import Web3, HTTPProvider
 
@@ -21,13 +21,13 @@ from lib.mybloom.bloomutil import *
 from deploy import compileContract
 from lib.util.env import getbase_dir
 
-def encryptData(data,size,fp=0.01,n=2):
+def encryptData(data,size,fp=0.01,n=2,bpower=8):
     """
         n : 2 = Bigrams
         size : Size of BF
         fp : False positive rate
     """
-    bloomfilter = BloomFilter(size,fp)
+    bloomfilter = BloomFilter(size,fp,bfpower=bpower)
     index = ngram.NGram(N=n)
     bigrams = list(index.ngrams(index.pad(str(data))))
 
@@ -61,7 +61,7 @@ def convertBF2BC(bf):
     return bytes(bf.filter)
 # end encrypt
 
-def encrypt_data(datadir,basename,bflen,ngrams=2):
+def encrypt_data(datadir,basename,bflen,ngrams=2,lpower=8):
 
     base_dir = getbase_dir('Datasets') + datadir + os.sep
 
@@ -77,7 +77,7 @@ def encrypt_data(datadir,basename,bflen,ngrams=2):
             else:
                 dbf1 = row[3] + row[4] + row[7]
                 dbf2 = row[8] + row[9] + row[12]
-                erow = [row[1], encryptData(dbf1, bflen, n=ngrams), row[2], encryptData(dbf2, bflen, n=ngrams)]
+                erow = [row[1], encryptData(dbf1, bflen, n=ngrams,bpower=lpower), row[2], encryptData(dbf2, bflen, n=ngrams,bpower=lpower)]
                 rows.append(erow)
                 line_count += 1
         # print(f'Processed {line_count} lines.')
@@ -152,9 +152,78 @@ def save2csv(data,epath,file_name,bpath='..'+os.sep+'results'+os.sep):
     df.to_csv(bpath+epath+os.sep+file_name, sep=';', encoding='utf-8')
 
 
+def convertBloomFilter2Ints(bf, word_size,endian='big'):
+    # 'little'
+    ints = []
+    bff = bf.filter;
+
+    niter = bff.length() / word_size
+    # if not isinstance(niter,int):
+    if bff.length() % word_size != 0:
+        raise Exception('The bloomfilter length/wordsize should be a interger, however it was: {}'.format(niter))
+    niter = int(niter)
+
+    start = 0
+    for i in range(1, niter + 1):
+        end = word_size * i
+        val = int.from_bytes(bff[start:end].tobytes(), byteorder=endian, signed=False)
+        ints.append(val)
+        start = end
+
+    return ints
+
+
+def fromIntes2bits(ints, word_size,endian='big'):
+    output = bitarray(endian=endian)
+
+    for i in ints:
+        p = bitarray(endian=endian)
+        z = i.to_bytes(int(word_size / 8), endian)
+        p.frombytes(z)
+        output.extend(p)
+
+    return output
+
 if __name__ == 'main':
     print("Anonnymizing entities..")
-    encrypted_entities = encrypt_data('bikes', 'candset.csv', 96)
+    encrypted_entities = encrypt_data('bikes', 'candset.csv', 96,lpower=256)
+    bf = encrypted_entities[0][1]
+    pbf = convertBloomFilter2Ints(bf,256)
+    rbf = fromIntes2bits(pbf,256)
+
+    # teste
+    obf = bf.filter
+    print("Testing length : [{}]".format(obf.length() ==  rbf.length()))
+    print("Testing number of ones : [{}]".format(obf.count() == rbf.count()))
+    print("Testing bitrepresentation: [{}]".format(obf.endian() == rbf.endian()))
+    print("Testing values : [{}]".format( obf == rbf))
+    print("Testing values with and: [{}]".format((obf & rbf) == obf))
+
+
+
+
+    # from bitarray import bitarray
+    # a = bitarray(endian='little')
+    # a.frombytes(z)
+
+
+    for i in pbf:
+
+
+
+
+
+
+    d = bitarray('0' * 30, endian='little')
+    struct.unpack("<L",d)[0]
+
+
+
+
+
+
+    import sys
+    sys.exit()
     print("Setup BC-Connection")
     # web3 = Web3(HTTPProvider('http://localhost:8545'))
 
@@ -172,16 +241,28 @@ if __name__ == 'main':
     print("Compiling SmartContracts")
     cc = compileContract(cFile)
     print("Deploying SmartContracts")
-    from deploy import deployContract
-    deployed_contract = deployContract(account, cFile, cc, cName, web3)
+    # from deploy import deployContract
+    # deployed_contract = deployContract(account, cFile, cc, cName, web3)
+    from deploy import deployContractInfura, createInstaceContract
+
+    cc = createInstaceContract(web3, cFile, cName)
+    deployed_contract = deployContractInfura(web3,cc,cFile,cName)
 
     #### alredy dployed contract
     # contract_address = '0xA76068c461716d34499cA221A037Cedb39067e26'
     # deployed_contract = get_DeployedContract(web3, 'ComparasionClassification', contract_address, 'ccb.sol')
 
+    start = datetime.datetime.today().strftime('%d-%m-%Y_%H-%M-%S')
+    r = exec_comparasion_regular_vs_bcjaccard(encrypted_entities,web3,deployed_contract,sleep_time=0.001)
+    end = datetime.datetime.today().strftime('%d-%H-%M-%S')
+
+    # r = exec_comparasion_regular_vs_bcjaccard(encrypted_entities[0:10], w3, smc, sleep_time=0.01)
+    # df = pd.DataFrame.from_records(r[1:], columns=r[0])
+    # print(df[['regular_jaccard', 'bc_jaccard']])
+    file_name = 'bike-private-PoW-' + start + '-to-' + end + '.csv'
+    save2csv(r, 'e1', file_name)
 
 
-    comparison_results = exec_comparasion_regular_vs_bcjaccard(encrypted_entities[0:5],web3,deployed_contract,sleep_time=0.01)
     # import pandas as pd
     # r = exec_comparasion_regular_vs_bcjaccard(encrypted_entities[0:5],web3,deployed_contract,bitlen=128,sleep_time=0.7)
     df = pd.DataFrame.from_records(comparison_results[1:], columns=comparison_results[0])
@@ -204,7 +285,7 @@ if __name__ == 'main':
     account = web3.eth.accounts[1]
     transaction = {'from': account, 'gas': estimated_gas + 2000, 'to': dc.address}
 
-    dc.functions.interUnion2(bcbf1, bcbf1).call(transaction)
+    dc.functions.interUnion2(bcbf1, bcbf1).call()
     dc.functions.compareEntities(bcbf1, bcbf1).call(transaction)
     dc.functions.jaccardBloom(bcbf1, bcbf1, int(2)).call(transaction)
 

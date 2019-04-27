@@ -7,7 +7,7 @@ class BloomFilter:
 
     # BloomFilter(1000, 0.01)
     # A bloom filter with 1000-element capacity and a 1% false positive rate
-    def __init__(self, cap=1000, fpr=0.01):
+    def __init__(self, cap=1000, fpr=0.01, bfpower=8):
 
         self.capacity = cap
         self.false_positive_rate = fpr
@@ -19,7 +19,9 @@ class BloomFilter:
             raise Exception('Invalid value for false positive rate. Must be in the open interval between 0 and 1.')
 
         # Calculate the number of bits needed for the false positive rate
-        self.bit_size = int(math.ceil( self.capacity*math.log(1/self.false_positive_rate) / math.log(2)**2 ))
+        # TODO: need to set a bit_size as a multiple of 8
+        n = int(math.ceil(self.capacity * math.log(1 / self.false_positive_rate) / math.log(2) ** 2))
+        self.bit_size = round(n/bfpower)*bfpower
 
         # Make sure the bloom filter is not too large for the 64-bit hash
         # to fill up.
