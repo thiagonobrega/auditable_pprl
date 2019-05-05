@@ -11,3 +11,6 @@ python/.idea/
 results/
 results/*
 results/**
+node/app1.js
+node/routes/router01.js
+.vscode/settings.json
