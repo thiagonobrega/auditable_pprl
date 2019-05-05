@@ -61,7 +61,7 @@ def convertBF2BC(bf):
     return bytes(bf.filter)
 # end encrypt
 
-def encrypt_data(datadir,basename,bflen,ngrams=2,lpower=8):
+def encrypt_data(datadir,basename,bflen,fp = 0.01,ngrams=2,lpower=8):
 
     base_dir = getbase_dir('Datasets') + datadir + os.sep
 
@@ -77,7 +77,7 @@ def encrypt_data(datadir,basename,bflen,ngrams=2,lpower=8):
             else:
                 dbf1 = row[3] + row[4] + row[7]
                 dbf2 = row[8] + row[9] + row[12]
-                erow = [row[1], encryptData(dbf1, bflen, n=ngrams,bpower=lpower), row[2], encryptData(dbf2, bflen, n=ngrams,bpower=lpower)]
+                erow = [row[1], encryptData(dbf1, bflen, n=ngrams, fp=fp, bpower=lpower), row[2], encryptData(dbf2, bflen, fp=fp, n=ngrams,bpower=lpower)]
                 rows.append(erow)
                 line_count += 1
         # print(f'Processed {line_count} lines.')
@@ -184,9 +184,33 @@ def fromIntes2bits(ints, word_size,endian='big'):
 
     return output
 
+def saveBF2JSON(bf_list,bfpart_sep="#",bf_sep="!",bflen=256):
+    index = 1
+    out = str(index) + ";"
+
+    first_bf = True
+    for bf in bf_list:
+        first = True
+
+        if first_bf:
+            first_bf = False
+        else:
+            out = out + bf_sep
+
+        for bfpart in convertBloomFilter2Ints(bf, 256):
+            if first:
+                out = out + str(bfpart)
+                first = False
+            else:
+                out = out + bfpart_sep +str(bfpart)
+
+    return out
+
+
 if __name__ == 'main':
     print("Anonnymizing entities..")
-    encrypted_entities = encrypt_data('bikes', 'candset.csv', 96,lpower=256)
+    encrypted_entities = encrypt_data('bikes', 'candset.csv', 96, lpower=256)
+    encrypted_entities = encrypt_data('bikes', 'candset.csv', 96, fp=0.05, lpower=256)
     bf = encrypted_entities[0][1]
     pbf = convertBloomFilter2Ints(bf,256)
     rbf = fromIntes2bits(pbf,256)
@@ -199,23 +223,33 @@ if __name__ == 'main':
     print("Testing values : [{}]".format( obf == rbf))
     print("Testing values with and: [{}]".format((obf & rbf) == obf))
 
+    pbf0 = pbf
+    pbf1 = convertBloomFilter2Ints(encrypted_entities[0][3], 256)
+
+    for i in pbf1:
+        print(hex(i));
+
+    bf1 = encrypted_entities[0][1]
+    bf2 = encrypted_entities[0][3]
+
+
+    def debug(bf1,bf2):
+        inter = bf1.intersection(bf2).filter.count(True)
+        union = bf1.union(bf2).filter.count(True)
+        jac = jaccard_coefficient(bf1,bf2)
+        return (inter,union,jac)
+
+    print(debug(bf1,bf2))
+    print(debug(bf2, bf1))
+    print(debug(bf1, bf1))
+    print(debug(bf2, bf2))
+
+    print(saveBF2JSON([bf1, bf2]))
+    convertBloomFilter2Ints(bf1,256)
 
 
 
-    # from bitarray import bitarray
-    # a = bitarray(endian='little')
-    # a.frombytes(z)
-
-
-    for i in pbf:
-
-
-
-
-
-
-    d = bitarray('0' * 30, endian='little')
-    struct.unpack("<L",d)[0]
+    print(BloomFilter(96, 0.05, bfpower=256).filter.length())
 
 
 
