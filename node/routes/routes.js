@@ -9,6 +9,15 @@ var appRouter = function (app) {
       res.status(200).send(z);
     });
 
+
+    app.get("/getBlk/:idb", function (req, res) {
+      var idb = req.params.idb;
+
+      var dbu = require("../util/db.js");
+      z = dbu.readById("./db", 'blks.db', idb-1);
+      res.status(200).send(z);
+    });
+
   }
   
   module.exports = appRouter;

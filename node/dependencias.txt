@@ -4,3 +4,15 @@ npm install body-parser --save
 #The body-parser package allows our API to process POST requests.
 #npm install picklejs --save
 #npm install faker --save
+
+
+
+a2enmod proxy
+a2enmod proxy_http
+a2enmod proxy_balancer
+a2enmod lbmethod_byrequests
+
+
+        ProxyRequests on
+        ProxyPass /api/ http://127.0.0.1:3000/
+        ProxyPassReverse /api/ http://127.0.0.1:3000/

@@ -35,12 +35,34 @@ function readBlock(fpath,fname,bflen) {
   return filters;
 }
 
+function readBlocks(fpath,fname) {
+  var filters = [];
+
+  lines = readData(fpath,fname)
+  lines.forEach(function(line){
+    var ld = line.replace(/\r$/,'').toString().split(";");
+    var eid = ld[0];
+    var bf = ld[1];
+    filters.push({
+                  id: eid,
+                  filter: bf
+    }); // end of push
+  }); //end of for each
+  return filters;
+}
+
+function readBlockById(fpath,fname,blk_id) {
+  var filters = readBlocks(fpath,fname);
+  return filters[blk_id];
+}
+
 // z = readBlock("./db", 'blk.txt',10);
 // console.log(z);
 
 module.exports = {
     // f1: myFunction1,
-    read: readBlock
+    read: readBlock,
+    readById: readBlockById
   };
 
   // z = readBlock("./db", 'blk.txt',10)
