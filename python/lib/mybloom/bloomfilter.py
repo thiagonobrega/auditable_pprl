@@ -2,17 +2,19 @@ from __future__ import division
 import math
 import xxhash
 import bitarray
+import numpy as np
 
 class BloomFilter:
 
     # BloomFilter(1000, 0.01)
     # A bloom filter with 1000-element capacity and a 1% false positive rate
-    def __init__(self, cap=1000, fpr=0.01, bfpower=8):
+    def __init__(self, cap=1000, fpr=0.01, bfpower=8, bs=0):
 
         self.capacity = cap
         self.false_positive_rate = fpr
         self.error_rate = fpr
         self.number_of_elements = 0
+        self.potencia = bfpower
 
         # Make sure the false positive rate is a reasonable value
         if self.false_positive_rate >= 1 or self.false_positive_rate <= 0:
@@ -20,22 +22,28 @@ class BloomFilter:
 
         # Calculate the number of bits needed for the false positive rate
         # TODO: need to set a bit_size as a multiple of 8
-        n = int(math.ceil(self.capacity * math.log(1 / self.false_positive_rate) / math.log(2) ** 2))
-        self.bit_size = round(n/bfpower)*bfpower
+        if bs == 0:
+            n = int(math.ceil(self.capacity * math.log(1 / self.false_positive_rate) / math.log(2) ** 2))
+            self.bit_size = round(n / bfpower) * bfpower
+        else:
+            self.bit_size = bs
 
         # Make sure the bloom filter is not too large for the 64-bit hash
         # to fill up.
         if self.bit_size > 18446744073709551616:
-            raise Exception('BloomFilter is too large for supported hash functions. Make it smaller by reducing capacity or increasing the false positive rate.')
+            raise Exception(
+                'BloomFilter is too large for supported hash functions. Make it smaller by reducing capacity or increasing the false positive rate.')
             return
 
         # Calculate the optimal number of hash functions
-        self.hash_functions = int(round( self.bit_size*math.log(2) / self.capacity ))
+        self.hash_functions = int(round(self.bit_size * math.log(2) / self.capacity))
 
         # Build the empty bloom filter
         self.filter = bitarray.bitarray(self.bit_size)
         self.filter.setall(False)
 
+    def set_hashfunction_by_p(self,p):
+        self.hash_functions = abs(int(round(math.log(p) * self.bit_size / self.capacity)))
 
     # Add an element to the bloom filter
     def add(self, element):
@@ -109,6 +117,100 @@ class BloomFilter:
         print('Bit Size '+str(self.bit_size))
         print('Number of Hash Functions '+str(self.hash_functions))
         print('Number of Elements '+str(self.number_of_elements))
+
+    ##################################################################################
+    ###
+    ### SPLITING BLOOM FILTER
+    ###
+    ##################################################################################
+
+    def split(self,n=2,p=256):
+        # for i in range(0,n):
+        lbs = round(self.bit_size/n)
+        cap = round(self.capacity/n)
+        a = BloomFilter(cap=cap, fpr=self.false_positive_rate, bfpower=p, bs=lbs)
+        b = BloomFilter(cap=cap, fpr=self.false_positive_rate, bfpower=p, bs=lbs)
+        a.filter = self.filter[0:lbs]
+        b.filter = self.filter[lbs:]
+        return a,b
+
+
+    ##################################################################################
+    ###
+    ### BLOOM FILTER HARDENING
+    ###
+    ##################################################################################
+    def xor_folding(self):
+        """
+            Returns a XOR-Folding BloomFilter with one folding
+
+            Schnell, R., Borgs, C., & Encryptions, F. (2016). XOR-Folding for Bloom Encryptions for Record Linkage.
+        """
+        lbs = round(self.bit_size / 2)
+        cap = round(self.capacity / 2)
+
+        fold_pos = round( len(self.filter) / 2 )
+
+        a = self.filter[0:fold_pos]
+        b = self.filter[fold_pos:]
+        # print('======>',self.bit_size,'#',len(a),len(b))
+
+        r = BloomFilter(cap=cap, fpr=self.false_positive_rate, bfpower=self.potencia, bs=lbs)
+        r.filter = a.__ixor__(b)
+        return r
+
+    def blip(self,f=0.02):
+        """
+            BLoom-and-flI (BLIP)
+
+            Schnell, R., & Borgs, C. (2017). Randomized Response and Balanced Bloom Filters for Privacy Preserving Record Linkage.
+            IEEE International Conference on Data Mining Workshops, ICDMW, 218–224. https://doi.org/10.1109/ICDMW.2016.0038
+        """
+
+        lbs = round(self.bit_size * 1)
+        cap = round(self.capacity * 1)
+
+
+        pf = 0.5 * f
+        a = self.filter.copy()
+
+        for i in range(0,len(a)):
+            if np.random.random() < pf:
+                a[i] = not a[i]
+
+
+        r = BloomFilter(cap=cap, fpr=self.false_positive_rate, bfpower=self.potencia, bs=lbs)
+        r.filter = a
+        return r
+
+    def bblip(self,f=0.02):
+        """
+            Balanced BLoom-and-flI (BBLIP)
+
+            Schnell, R., & Borgs, C. (2017). Randomized Response and Balanced Bloom Filters for Privacy Preserving Record Linkage.
+            IEEE International Conference on Data Mining Workshops, ICDMW, 218–224. https://doi.org/10.1109/ICDMW.2016.0038
+
+            The deufault value was chosend by the best result presented by the author
+        """
+        lbs = round(self.bit_size * 2)
+        cap = round(self.capacity * 2)
+
+        a = self.filter.copy()
+        b = self.filter.copy()
+        b.invert()
+        c = a + b
+
+        pf = 0.5 * f
+
+
+        for i in range(0, len(c)):
+            if np.random.random() < pf:
+                c[i] = not c[i]
+
+        r = BloomFilter(cap=cap, fpr=self.false_positive_rate, bfpower=self.potencia, bs=lbs)
+        r.filter = c
+        return r
+
 
 # The seed should be a string
 def test_bloom_filter_performance(number_of_elements = 1000000,false_positive_rate = 0.01, number_of_false_positive_tests = 10000, seed = 'Test'):

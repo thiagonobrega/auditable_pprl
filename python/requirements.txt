@@ -9,3 +9,6 @@ py-solc-x
 ngram
 xxhash
 bitarray
+
+nufhe
+Pyfhel

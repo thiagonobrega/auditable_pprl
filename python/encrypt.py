@@ -21,13 +21,16 @@ from lib.mybloom.bloomutil import *
 from deploy import compileContract
 from lib.util.env import getbase_dir
 
-def encryptData(data,size,fp=0.01,n=2,bpower=8):
+def encryptData(data,size,fp=0.01,n=2,bpower=8,p=None):
     """
         n : 2 = Bigrams
         size : Size of BF
         fp : False positive rate
     """
     bloomfilter = BloomFilter(size,fp,bfpower=bpower)
+    if p != None:
+        bloomfilter.set_hashfunction_by_p(p)
+
     index = ngram.NGram(N=n)
     bigrams = list(index.ngrams(index.pad(str(data))))
 
@@ -61,13 +64,23 @@ def convertBF2BC(bf):
     return bytes(bf.filter)
 # end encrypt
 
-def encrypt_data(datadir,basename,bflen,fp = 0.01,ngrams=2,lpower=8):
+import pkgutil
+import encodings
+import os
 
-    base_dir = getbase_dir('Datasets') + datadir + os.sep
+def all_encodings():
+    modnames = set([modname for importer, modname, ispkg in pkgutil.walk_packages(
+        path=[os.path.dirname(encodings.__file__)], prefix='')])
+    aliases = set(encodings.aliases.aliases.values())
+    return modnames.union(aliases)
+
+def encrypt_data(datadir, basename, e1_fields, e2_fields, bflen, fp = 0.01, ngrams=2, lpower=256, enc='utf-8', set_p=None):
+
+    base_dir = getbase_dir(['Datasets',datadir]) # + os.sep
 
     rows = []
     # print(base_dir+basename)
-    with open(base_dir + basename) as csv_file:
+    with open(base_dir + basename, encoding=enc, errors='replace') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         for row in csv_reader:
@@ -75,12 +88,97 @@ def encrypt_data(datadir,basename,bflen,fp = 0.01,ngrams=2,lpower=8):
                 # print(f'Column names are {", ".join(row)}')
                 line_count += 1
             else:
-                dbf1 = row[3] + row[4] + row[7]
-                dbf2 = row[8] + row[9] + row[12]
-                erow = [row[1], encryptData(dbf1, bflen, n=ngrams, fp=fp, bpower=lpower), row[2], encryptData(dbf2, bflen, fp=fp, n=ngrams,bpower=lpower)]
+                try:
+                    dbf1 = row[e1_fields[0]]
+                    for i in e1_fields[1:]:
+                        dbf1 = dbf1 + row[i]
+
+                    dbf2 = row[e2_fields[0]]
+                    for i in e2_fields[1:]:
+                        dbf2 = dbf2 + row[i]
+
+                    #dbf1 = row[3] + row[4] + row[7]
+                    #dbf2 = row[8] + row[9] + row[12]
+
+                    if set_p == None:
+                        erow = [row[1], encryptData(dbf1, bflen, n=ngrams, fp=fp, bpower=lpower), row[2], encryptData(dbf2, bflen, fp=fp, n=ngrams,bpower=lpower)]
+                    else:
+                        erow = [row[1], encryptData(dbf1, bflen, n=ngrams, fp=fp, bpower=lpower, p=set_p), row[2],
+                                encryptData(dbf2, bflen, fp=fp, n=ngrams, bpower=lpower, p=set_p)]
+                    rows.append(erow)
+                    line_count += 1
+                except IndexError:
+                    print(row)
+                    print(e1_fields)
+                    print(e2_fields)
+            # print(f'Processed {line_count} lines.')
+    return rows
+
+def encrypt_data_in_memory(df, e1_fields, bflen, fp = 0.01, ngrams=2, lpower=256, enc='utf-8', set_p=None):
+
+    rows = []
+    line_count = 0
+
+    for index, row in df.iterrows():
+        if line_count == 0:
+            line_count += 1
+        else:
+            try:
+                dbf1 = str(row[e1_fields[1]])
+                for i in e1_fields[1:]:
+                    dbf1 = dbf1 + str(row[i])
+
+                # print(dbf1)
+                if set_p == None:
+                    erow = [row[0], encryptData(dbf1, bflen, n=ngrams, fp=fp, bpower=lpower)]
+                else:
+                    erow = [row[0], encryptData(dbf1, bflen, n=ngrams, fp=fp, bpower=lpower, p=set_p)]
                 rows.append(erow)
                 line_count += 1
+            except IndexError:
+                print(row)
+                print(e1_fields)
         # print(f'Processed {line_count} lines.')
+    return rows
+
+def parallel_encrypt_data(outpdatadir, basename, e1_fields, e2_fields, bflen, fp = 0.01, ngrams=2, lpower=8, enc='utf-8', set_p=None):
+
+    base_dir = getbase_dir('Datasets') + datadir + os.sep
+
+    rows = []
+    # print(base_dir+basename)
+    with open(base_dir + basename, encoding=enc, errors='replace') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            if line_count == 0:
+                # print(f'Column names are {", ".join(row)}')
+                line_count += 1
+            else:
+                try:
+                    dbf1 = row[e1_fields[0]]
+                    for i in e1_fields[1:]:
+                        dbf1 = dbf1 + row[i]
+
+                    dbf2 = row[e2_fields[0]]
+                    for i in e2_fields[1:]:
+                        dbf2 = dbf2 + row[i]
+
+                    #dbf1 = row[3] + row[4] + row[7]
+                    #dbf2 = row[8] + row[9] + row[12]
+
+                    if set_p == None:
+                        erow = [row[1], encryptData(dbf1, bflen, n=ngrams, fp=fp, bpower=lpower), row[2], encryptData(dbf2, bflen, fp=fp, n=ngrams,bpower=lpower)]
+                    else:
+                        erow = [row[1], encryptData(dbf1, bflen, n=ngrams, fp=fp, bpower=lpower, p=set_p), row[2],
+                                encryptData(dbf2, bflen, fp=fp, n=ngrams, bpower=lpower, p=set_p)]
+                    rows.append(erow)
+                    line_count += 1
+                except IndexError:
+                    print(row)
+                    print(e1_fields)
+                    print(e2_fields)
+            # print(f'Processed {line_count} lines.')
     return rows
 
 def exec_comparasion_regular_vs_bcjaccard(rows,web3,dc,sleep_time=0.5):

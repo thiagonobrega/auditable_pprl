@@ -44,5 +44,7 @@ def jaccard_coefficient(filter1 , filter2):
     inter = filter1.intersection(filter2).filter.count(True)
     union = filter1.union(filter2).filter.count(True)
     
+    if union == 0:
+        return 0
+
     return inter/union
-    
