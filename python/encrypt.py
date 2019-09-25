@@ -114,6 +114,37 @@ def encrypt_data(datadir, basename, e1_fields, e2_fields, bflen, fp = 0.01, ngra
             # print(f'Processed {line_count} lines.')
     return rows
 
+def encrypt_data2(datadir, basename, e1_fields, bflen, fp = 0.01, ngrams=2, lpower=256, enc='utf-8', set_p=None):
+
+    base_dir = getbase_dir(['Datasets',datadir]) # + os.sep
+
+    rows = []
+    # print(base_dir+basename)
+    with open(base_dir + basename, encoding=enc, errors='replace') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            if line_count == 0:
+                # print(f'Column names are {", ".join(row)}')
+                line_count += 1
+            else:
+                try:
+                    dbf1 = row[e1_fields[0]]
+                    for i in e1_fields[1:]:
+                        dbf1 = dbf1 + row[i]
+
+                    if set_p == None:
+                        erow = [row[0], encryptData(dbf1, bflen, n=ngrams, fp=fp, bpower=lpower)]
+                    else:
+                        erow = [row[0], encryptData(dbf1, bflen, n=ngrams, fp=fp, bpower=lpower, p=set_p)]
+                    rows.append(erow)
+                    line_count += 1
+                except IndexError:
+                    print(row)
+                    print(e1_fields)
+            # print(f'Processed {line_count} lines.')
+    return rows
+
 def encrypt_data_in_memory(df, e1_fields, bflen, fp = 0.01, ngrams=2, lpower=256, enc='utf-8', set_p=None):
 
     rows = []

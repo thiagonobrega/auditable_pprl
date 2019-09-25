@@ -69,6 +69,11 @@ def processMultisplit(datadir, basename, e1_fields, e2_fields, bflen):
     print('Done ' + datadir + "!")
 
 processMultisplit('bikes', 'candset.csv', [3,4,7] , [8,9,12],96)
+
+# z1 = encrypt_data2('bikes','bikedekho.csv',[1,2,3,4,6,7],96)
+# z2 = encrypt_data2('bikes','bikewale.csv',[1,2,3,4,6,7],96)
+# len(z2)
+
 processMultisplit('beer', 'sample-candset.csv', [1,3,4] , [2,5,6],96)
 processMultisplit('books1', 'candset.csv', [1,3,4,5] , [2,6,7,8],256)
 processMultisplit('eletronics', 'sample-candset.csv', [1,4,5,3] , [2,6,7,8],1024)
