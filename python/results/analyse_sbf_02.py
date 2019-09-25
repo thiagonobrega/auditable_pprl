@@ -201,7 +201,16 @@ def plot_error_epsilon_distribution(z,marcas=[1, 3, 5, 6],fs=(12, 6)):
 
 
 
-def exponential_regression2var(func_exp,x_data, y_data,eq_label=r'$f(x) = {:.2f} * ln( {:.2f} * x)$'):
+def exponential_regression2var_v1(func_exp,x_data, y_data,eq_label=r'$f(x) = {:.2f} * ln( {:.2f} * x)$'):
+    """
+    Original
+
+    :param func_exp:
+    :param x_data:
+    :param y_data:
+    :param eq_label:
+    :return:
+    """
     fig = plt.gcf()
     popt, pcov = scipy.optimize.curve_fit(func_exp, x_data, y_data, p0 = (-1, 0.01))
     print(popt)
@@ -219,11 +228,38 @@ def exponential_regression2var(func_exp,x_data, y_data,eq_label=r'$f(x) = {:.2f}
     plt.xlabel("$x=\\frac{s}{l}$")
     plt.ylabel('Error')
     plt.show()
-    fig.savefig(getbase_dir(['results', 'sbf_02b']) + "estimated_sbf_erro.png", dpi=300)
+    fig.savefig(getbase_dir(['results', 'sbf_02b']) + "new_estimated_sbf_erro.png", dpi=300)
     # plt.close()
 
     return popt
     # return func_exp(x_data, *popt),popt
+
+def exponential_regression2var(func_exp,x_data, y_data, xg, yg , eq_label=r'$f(x) = {:.2f} * ln( {:.2f} * x) + {:.2f}$'):
+    # func_exp = q2
+    # x_data = X
+    # y_data = y
+    # xg = Xg
+    fig = plt.gcf()
+    popt, pcov = scipy.optimize.curve_fit(func_exp, x_data, y_data, p0 = (-1, 0.01, 0))
+    print(popt)
+    puntos = plt.plot(xg, yg, 'x', color='xkcd:maroon', label = "data")
+
+    y_predicted = func_exp(xg, *popt)
+    rmse = np.sqrt(mean_squared_error(yg, y_predicted))
+
+    eq_label = eq_label.format(*popt) + ", rmse = {:.3f}".format(rmse)
+    curva_regresion = plt.plot(x_data, func_exp(x_data, *popt), color='xkcd:teal', label = eq_label)
+
+    # curva_regresion = plt.plot(x_data, func_exp(x_data, *popt), color='xkcd:teal', label=eq_label + end_label)
+    plt.legend()
+    plt.title("Estimated Error in SBF")
+    plt.xlabel("$x=\\frac{s}{l}$")
+    plt.ylabel('Error')
+    plt.show()
+    fig.savefig(getbase_dir(['results', 'sbf_02b']) + "new_estimated_sbf_erro.png", dpi=300)
+    # plt.close()
+
+    return popt
 
 def exponential_regression(q3,q2,x_data, y_data):
     popt3, pcov3 = scipy.optimize.curve_fit(q3, x_data, y_data, p0=(-10, 0.01, 1))
@@ -243,14 +279,14 @@ def exponential_regression(q3,q2,x_data, y_data):
     plt.show()
 
 def plot_episilon_approximation(a,b):
-    # a=-0.042876301194393125
-    # b=3.2574724870013103
+    a=-0.042876301194393125
+    b=3.2574724870013103
     sns.set_style("whitegrid")
     fig, ax = plt.subplots(figsize=(5, 4))
     fe = lambda x, a , b: -1 * np.log(a * np.log(b * x)) #eq completa
     fe1 = lambda x, a, b: np.log( 1/ (a * np.log(b * x)) )
     simplificada_01 = lambda x, a, b: np.log(a) - np.log(b * x)
-    as1 = lambda x: ( 1/np.log(np.log(1/x)) ) + 1 # aqui
+    as1 = lambda x: ( np.log(1/np.log(1/x)) ) + 3.7 # aqui
     # as2 = lambda x: np.log(1/np.log(1 / x))
     # as2 = lambda x: np.log(1 / np.log(x))
     # as2 = lambda x,a: np.log(-1*np.abs(a)*np.log(1/x))
@@ -259,7 +295,7 @@ def plot_episilon_approximation(a,b):
     # as3 = lambda x, b: 1 / np.log( (np.log(1/b)+np.log(1 / x)) )
     # assintotico = lambda x: -1 / np.log(x)
 
-    p = np.linspace(0.01, .25, num=50)
+    p = np.linspace(0.00001, .25, num=50)
 
     data = []
     for xp in p:
@@ -268,7 +304,7 @@ def plot_episilon_approximation(a,b):
                      # "$\\frac{1}{a * ln(b*x)}$"))
         # data.append((xp,fe1(xp, a, b), 'c1'))
         # data.append((xp, simplificada_01(xp, 1, b), 's1'))
-        data.append((xp, as1(xp), r'$1 + \frac{1}{ln(ln(\frac{1}{x}))}$'))
+        data.append((xp, as1(xp), r'$ln(\frac{1}{ln(\frac{1}{x})})+ c ,  c=2$'))
         # data.append((xp, as2(xp,-1*a), 'as2'))
         # data.append((xp, as2(xp,a), 'as2'))
         # data.append((xp, as3(xp, b), 'as3'))
@@ -323,6 +359,15 @@ if __name__ == 'main':
     df['x'] = ((df.orignal_bits_size / df.splits) / df.orignal_bits_size)
     plot_all_ds_considering_percent(df[df.bf_type == 'BBF'], dash_styles)
 
+    ### person testando a correlação entre o teste
+    import scipy
+    z = df.copy()
+    z['nd'] = abs(z.full - z.psim_mean)
+
+    pr , pv = scipy.stats.pearsonr(z.nd,z.mean_dist_of_real)
+    scipy.stats.pearsonr(z.full, z.full-z.mean_dist_of_real)
+    print(pr,pv)
+
     plot_error_epsilon_distribution(df,marcas=[1, 3, 4, 5],fs=(8,6))
 
     # REGRESSAO PARA MOSTRAR A EQUACAO QUE CASA COM O ERRO
@@ -343,10 +388,27 @@ if __name__ == 'main':
     # X = np.asarray(bdf[['x']]).T[0]
     #y = np.asarray(bdf[['mean_dist_of_real']]).T[0]
 
+    ## plotar com dados individualizados
+    Xg = []
+    yg = []
+    for ids in bdf.ds.unique():
+        tz = bdf[bdf.ds == ids]
+        for x in bdf[bdf.ds == ids].x.unique():
+            if x != 0.5 and x > 0.01:
+                Xg.append(x)
+                yg.append(tz[tz.x == x].mean_dist_of_real.mean())
+
+    Xg = np.asarray(Xg)
+    yg = np.asarray(yg)
+
     # best -0.042, 0.088 , -0.142
     # best -0.042, 0.088 , -0.142
+    # c depois
+    q2 = lambda x, a, b , c : a * np.log(b * x) + c
+    a,b,c = exponential_regression2var(q2, X, y , Xg , yg)
+
     q2 = lambda x, a, b: a * np.log(b * x)
-    a,b = exponential_regression2var(q2, X, y)
+    a, b = exponential_regression2var_v1(q2, Xg, yg)
 
     plot_episilon_approximation(a, b)
 
