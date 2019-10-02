@@ -9,9 +9,11 @@ cc.sol
 python/.idea/
 *.pyc
 results/
-results/*
-results/**
+CCF/
+Datasets/
 node/app1.js
 node/routes/router01.js
 .vscode/settings.json
 Contracts/examples/*
+python/scratch/*
+scratch/*

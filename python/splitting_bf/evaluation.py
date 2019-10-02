@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 #import matplotlib as plt
+import time
 
 from lib.mybloom.bloomfilter import BloomFilter
 from lib.mybloom.bloomutil import jaccard_coefficient
@@ -212,3 +213,95 @@ def plotResult(domain,fname,att1,att2,size=96,encoding='utf-8'):
     plt.ylabel("Diferença em %")
     fig.show()
     fig.savefig(domain+'.png')
+
+
+########
+######## Analises dos resultados
+
+def isTrueMatch(gs,ida,idb,base_a='idDBLP',base_b='idACM'):
+    """
+     Utilizando dict para ser mais rapido
+
+    :param gs:
+    :param ida:
+    :param idb:
+    :param base_a:
+    :param base_b:
+    :return:
+    """
+    try:
+        if ( gs[str(ida)+str(idb)] == True ):
+            return True
+    except KeyError:
+        return False
+
+def isTrueMatchOriginal(gs,ida,idb,base_a='idDBLP',base_b='idACM'):
+    try:
+        z = gs[(gs[base_a] == ida) & (gs[base_b] == idb)]
+    except KeyError:
+        return False
+    if len(z) == 1:
+        return True
+
+    return False
+
+def simulated_sbf_protocol(df,goldstandard,threshold_a,error=0.02,original_bf_len=1024):
+    """
+    Simula a abordagem ABEL
+
+    :param df: UM DATAFRAME COM A SIMILARIDADE
+    :param goldstandard: o gabarito
+    :param threshold_a: o limiar alfa
+    :param error: O erro para calcular o limiar beta
+    :param original_bf_len: Tamanho original do filtro de Bloom
+    :return:
+    """
+    t = threshold_a-error
+    result = []
+    count = 0
+
+    for index, row in df.iterrows():
+        save_flag = True
+        rp = {'id_a': row['id_a'], 'id_b': row['id_b'] ,
+              'split_sim': row['split_sim'], 'sbf_sim': row['sbf_sim'], 'bf_sim': row['full_bf'],
+              'original_bflen': original_bf_len , 'sbf_splits': row['splits'],
+              'alfa': threshold_a , 'beta_error' : error}
+
+        if row['split_sim'] >= t:
+            rp['abel_1st_s'] = True
+        else:
+            rp['abel_1st_s'] = False
+
+        if row['sbf_sim'] >= threshold_a:
+            if isTrueMatch(goldstandard, row['id_a'], row['id_b']):
+                rp['sbf_stat'] = 'TM'
+            else:
+                rp['sbf_stat'] = 'FM'
+        else:
+            if isTrueMatch(goldstandard, row['id_a'], row['id_b']):
+                rp['sbf_stat'] = 'FTM' # Fault TM
+            else:
+                save_flag = False
+            #     rp['sbf_stat'] = 'TFM' # TFM
+
+
+        if row['full_bf'] >= threshold_a:
+            if isTrueMatch(goldstandard, row['id_a'], row['id_b']):
+                rp['bf_stat'] = 'TM' #criar metodo
+            else:
+                rp['bf_stat'] = 'FM'  # criar metodo
+        else:
+            if isTrueMatch(goldstandard, row['id_a'], row['id_b']):
+                rp['bf_stat'] = 'FTM' # Fault TM
+            else:
+                save_flag = False
+            #     rp['bf_stat'] = 'TFM' # TFM
+
+        if save_flag:
+            result.append(rp)
+
+        count += 1
+        if count % 500000 == 0:
+            print(count / len(df) * 100)
+
+    return pd.DataFrame(result)
