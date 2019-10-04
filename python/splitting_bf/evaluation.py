@@ -256,6 +256,8 @@ def simulated_sbf_protocol(df,goldstandard,threshold_a,error=0.02,original_bf_le
     :param original_bf_len: Tamanho original do filtro de Bloom
     :return:
     """
+
+    s = len(df)
     t = threshold_a-error
     result = []
     count = 0
@@ -280,6 +282,7 @@ def simulated_sbf_protocol(df,goldstandard,threshold_a,error=0.02,original_bf_le
         else:
             if isTrueMatch(goldstandard, row['id_a'], row['id_b']):
                 rp['sbf_stat'] = 'FTM' # Fault TM
+                save_flag = False
             else:
                 save_flag = False
             #     rp['sbf_stat'] = 'TFM' # TFM
@@ -292,6 +295,7 @@ def simulated_sbf_protocol(df,goldstandard,threshold_a,error=0.02,original_bf_le
                 rp['bf_stat'] = 'FM'  # criar metodo
         else:
             if isTrueMatch(goldstandard, row['id_a'], row['id_b']):
+                save_flag = False
                 rp['bf_stat'] = 'FTM' # Fault TM
             else:
                 save_flag = False
@@ -302,6 +306,6 @@ def simulated_sbf_protocol(df,goldstandard,threshold_a,error=0.02,original_bf_le
 
         count += 1
         if count % 500000 == 0:
-            print(count / len(df) * 100)
+            print(count / s * 100)
 
     return pd.DataFrame(result)
