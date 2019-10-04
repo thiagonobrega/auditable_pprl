@@ -15,3 +15,11 @@ pip install -r requirements.txt
 conda update conda
 conda install numba
 conda install cudatoolkit
+
+jupyter-notebook.exe .
+
+
+
+
+
+D:\Programas\Anaconda3\python.exe D:\Programas\Anaconda3\cwp.py D:\Programas\Anaconda3 D:\Programas\Anaconda3\python.exe D:\Programas\Anaconda3\Scripts\jupyter-notebook-script.py D:\Dados\OneDrive\Doutorado\workspace\bc-playground\python
