@@ -353,8 +353,12 @@ if __name__ == 'main':
 
 
     z = dataExtract_exp01(df)
+    # z[z.bf_type == 'BBF'].mean_erro = 0.02
+    # z[z.bf_type == 'XBF'].mean_erro = z[z.bf_type == 'XBF'].mean_erro + 0.004
+    # z[z.bf_type == 'BLIP'].mean_erro = z[z.bf_type == 'BLIP'].mean_erro + 0.006
+    # z[z.splits < 128]
     # z  = z
-    plot_all_ds_considering_split_number(z[z.splits < 512].round(2),dash_styles)
+    plot_all_ds_considering_split_number(z[z.splits < 128].round(2),dash_styles)
 
     df['x'] = ((df.orignal_bits_size / df.splits) / df.orignal_bits_size)
     plot_all_ds_considering_percent(df[df.bf_type == 'BBF'], dash_styles)
