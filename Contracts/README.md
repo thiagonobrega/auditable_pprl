@@ -13,9 +13,10 @@ The experiments can be executed in two scenarios; i) in a private Ethereum netwo
 
 To execute the private Ethereum network, we recommend the use of a docker environment to build the test netwok. A detailed tutorial is provided in this [repository](https://github.com/Capgemini-AIE/ethereum-docker). 
 
-To use the public Ethereum network follow the instruction provided in this [tutorial](https://medium.com/swlh/deploy-smart-contracts-on-ropsten-testnet-through-ethereum-remix-233cd1494b4b).
+To use the public Ethereum network, follow the instruction provided in this [tutorial](https://medium.com/swlh/deploy-smart-contracts-on-ropsten-testnet-through-ethereum-remix-233cd1494b4b).
 
 ## Deploy
+
 
 
 
