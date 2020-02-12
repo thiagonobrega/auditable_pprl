@@ -15,8 +15,12 @@ To execute the private Ethereum network, we recommend the use of a docker enviro
 
 To use the public Ethereum network, follow the instruction provided in this [tutorial](https://medium.com/swlh/deploy-smart-contracts-on-ropsten-testnet-through-ethereum-remix-233cd1494b4b).
 
-## Deploy
 
+### Web Service
+
+We provide an example of web service (implemented in node.js) to simulate the PPRL participants.  This web service must be deployed in a server with a public IP; that is, the smart contract must access the web service. The instructions to deploy the web service is provided in the node directory of this project. 
+
+### Semi-Trusted Third Party Smart Contract
 
 
 
