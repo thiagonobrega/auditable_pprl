@@ -8,4 +8,4 @@ This repository contain the source code
 - The datasets need to be extracted (see [Dataset/README.md](Dataset/README.md) )
 - Run the execution scripts
   - Python (see (see [execution/README.md](python/README.md) )
-  - Ethereum (see (see [execution/README.md](Contract/README.md) )
+  - Ethereum [Instructions](./Contract/README.md) )
