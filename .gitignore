@@ -16,3 +16,24 @@ node/routes/router01.js
 Contracts/examples/*
 python/scratch/*
 scratch/*
+.idea/bc-playground.iml
+.idea/deployment.xml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+python/.ipynb_checkpoints/1 - encrypt-checkpoint.ipynb
+python/.ipynb_checkpoints/2 - evaluate_sbf-checkpoint.ipynb
+python/.ipynb_checkpoints/2.1 - sbf_priv_eval-checkpoint.ipynb
+python/.ipynb_checkpoints/3 - analises_abel-g1-checkpoint.ipynb
+python/.ipynb_checkpoints/3 - analises_abel-g1-original-checkpoint.ipynb
+python/.ipynb_checkpoints/3.1 - analise_sem_processamento_abel-checkpoint.ipynb
+python/.ipynb_checkpoints/4 - analise_sem_processamento_abel-checkpoint.ipynb
+python/.ipynb_checkpoints/4.1 - analise_sem_processamento_abel-original-checkpoint.ipynb
+python/.ipynb_checkpoints/5 - abel_eficiency-checkpoint.ipynb
+python/.ipynb_checkpoints/abel_eficiency-checkpoint.ipynb
+python/.ipynb_checkpoints/analise_sem_processamento_abel-Copy1-checkpoint.ipynb
+python/.ipynb_checkpoints/analise_sem_processamento_abel-Copy2-checkpoint.ipynb
+python/.ipynb_checkpoints/analises_abel-checkpoint.ipynb
+python/.ipynb_checkpoints/analises_abel-g1-checkpoint.ipynb
+python/.ipynb_checkpoints/Blocagem-checkpoint.ipynb
