@@ -13,12 +13,12 @@ import datetime
 import pandas as pd
 from bitarray import bitarray
 import ngram
-from web3 import Web3, HTTPProvider
+# from web3 import Web3, HTTPProvider
 
-from lib.util.bc import *
+# from lib.util.bc import *
 from lib.mybloom.bloomfilter import BloomFilter
 from lib.mybloom.bloomutil import *
-from deploy import compileContract
+# from deploy import compileContract
 from lib.util.env import getbase_dir
 
 def encryptData(data,size,fp=0.01,n=2,bpower=8,p=None):
